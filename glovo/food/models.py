@@ -14,8 +14,8 @@ class UserProfile(AbstractUser):
         ('courier', 'courier'),
         ('owner', 'owner'),
     )
-    status = models.CharField()
-    user_image = models.ImageField(choices=STATUS_CHOICES, max_length=32, default='client')
+    status = models.CharField(choices=STATUS_CHOICES, max_length=32, default='client')
+    user_image = models.ImageField(null=True, blank=True)
 
     def __str__(self):
         return f'{self.first_name}, {self.last_name}'
@@ -62,7 +62,7 @@ class Product(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product_name = models.CharField(max_length=64)
     product_image = models.ImageField()
-    price = models.DecimalField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
 
     def __str__(self):
@@ -79,7 +79,7 @@ class ProductCombo(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     combo_name = models.CharField(max_length=32)
     combo_image = models.ImageField()
-    combo_price = DecimalField()
+    combo_price = DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
 
     def __str__(self):
@@ -94,10 +94,9 @@ class Burgers(models.Model):
 
 class Order(models.Model):
     client = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    courier = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     STATUS_ORDER_CHOICES = (
-        ('waiting processing', 'waiting processing'),
-        ('process of delivery', 'process of delivery'),
+        ('waiting', 'waiting'),
+        ('process', 'process'),
         ('delivered', 'delivered'),
         ('cancelled', 'cancelled')
     )
@@ -122,12 +121,13 @@ class ReviewStore(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
     comment = models.TextField()
+    created_date = models.DateField(auto_now_add=True)
 
 
 class RatingCourier(models.Model):
     courier = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     stars = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
-
+    created_date = models.DateField(auto_now_add=True)
 
 
 
