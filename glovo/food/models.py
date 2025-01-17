@@ -93,7 +93,7 @@ class Burgers(models.Model):
 class Order(models.Model):
     client = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='client')
     cart = models.OneToOneField(Cart, on_delete=models.CASCADE)
-    courier = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='courier')
+    courier = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='order_courier')
     STATUS_ORDER_CHOICES = (
         ('waiting', 'waiting'),
         ('process', 'process'),
@@ -107,13 +107,13 @@ class Order(models.Model):
 
 
 class Courier(models.Model):
-    courier = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    courier = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='courier')
     STATUS_CHOICES = (
         ('available', 'available'),
         ('busy', 'busy')
     )
     status_courier = models.CharField(choices=STATUS_CHOICES, max_length=16, default='available')
-    current_order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    current_order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_courier')
 
     def __str__(self):
         return f'{self.courier} - {self.status_courier}'
