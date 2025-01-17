@@ -115,6 +115,9 @@ class Courier(models.Model):
     status_courier = models.CharField(choices=STATUS_CHOICES, max_length=16, default='available')
     current_order = models.ForeignKey(Order, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f'{self.courier} - {self.status_courier}'
+
 class ReviewStore(models.Model):
     client = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
@@ -122,7 +125,13 @@ class ReviewStore(models.Model):
     comment = models.TextField()
     created_date = models.DateField(auto_now_add=True)
 
+    def __str__(self):
+        return f'{self.client} - {self.store} - {self.rating}'
+
 class RatingCourier(models.Model):
     courier = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     stars = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
     created_date = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.courier} - {self.stars}'
