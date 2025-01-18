@@ -20,11 +20,13 @@ class UserProfile(AbstractUser):
     def __str__(self):
         return f'{self.first_name}, {self.last_name}'
 
+
 class Category(models.Model):
     category_name = models.CharField(max_length=32, unique=True)
 
     def __str__(self):
         return self.category_name
+
 
 class Store(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -36,6 +38,7 @@ class Store(models.Model):
     def __str__(self):
         return self.store_name
 
+
 class ContactInfo(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     title = models.CharField(max_length=32)
@@ -45,12 +48,14 @@ class ContactInfo(models.Model):
     def __str__(self):
         return f'{self.store}'
 
+
 class Cart(models.Model):
     user = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'{self.user}'
+
 
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -64,6 +69,7 @@ class Product(models.Model):
     def __str__(self):
         return self.product_name
 
+
 class CarItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -71,6 +77,7 @@ class CarItem(models.Model):
 
     def __str__(self):
         return f'{self.cart}'
+
 
 class ProductCombo(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
@@ -82,6 +89,7 @@ class ProductCombo(models.Model):
     def __str__(self):
         return self.combo_name
 
+
 class Burgers(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -89,6 +97,7 @@ class Burgers(models.Model):
 
     def __str__(self):
         return f'{self.product}'
+
 
 class Order(models.Model):
     client = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='client')
@@ -118,6 +127,7 @@ class Courier(models.Model):
     def __str__(self):
         return f'{self.courier} - {self.status_courier}'
 
+
 class ReviewStore(models.Model):
     client = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
@@ -127,6 +137,7 @@ class ReviewStore(models.Model):
 
     def __str__(self):
         return f'{self.client} - {self.store} - {self.rating}'
+
 
 class RatingCourier(models.Model):
     courier = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
