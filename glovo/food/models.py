@@ -30,6 +30,7 @@ class Category(models.Model):
 
 class Store(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    store_image = models.ImageField(upload_to='store_images', null=True, blank=True)
     owner = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     store_name = models.CharField(max_length=32, unique=True)
     description = models.TextField()
@@ -58,7 +59,6 @@ class Cart(models.Model):
 
 
 class Product(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product_name = models.CharField(max_length=64)

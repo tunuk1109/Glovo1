@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import *
 from modeltranslation.admin import TranslationAdmin, TranslationInlineModelAdmin
 
-@admin.register(Category, Product, ProductCombo, Order)
+@admin.register(Category, Order)
 class AllAdmin(TranslationAdmin):
 
     class Media:
@@ -20,10 +20,17 @@ class ContactInfoInline(admin.StackedInline, TranslationInlineModelAdmin):
     model = ContactInfo
     extra = 1
 
+class ProductInline(admin.StackedInline, TranslationInlineModelAdmin):
+    model = Product
+    extra = 1
+
+class ProductComboInline(admin.StackedInline, TranslationInlineModelAdmin):
+    model = ProductCombo
+    extra = 1
 
 @admin.register(Store)
 class StoreAdmin(TranslationAdmin):
-    inlines = [ContactInfoInline]
+    inlines = [ContactInfoInline, ProductInline, ProductComboInline]
 
     class Media:
         js = (
