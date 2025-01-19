@@ -1,3 +1,4 @@
+from PIL.BlpImagePlugin import Format
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -110,9 +111,13 @@ class Order(models.Model):
         ('cancelled', 'cancelled')
     )
     order_status = models.CharField(choices=STATUS_ORDER_CHOICES, max_length=16)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
     product_combo = models.ForeignKey(ProductCombo, on_delete=models.CASCADE)
     delivery_address = models.CharField(max_length=32)
     created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.courier}, {self.client}, {self.product}, {self.product_combo}'
 
 
 class Courier(models.Model):
@@ -122,7 +127,7 @@ class Courier(models.Model):
         ('busy', 'busy')
     )
     status_courier = models.CharField(choices=STATUS_CHOICES, max_length=16, default='available')
-    current_order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_courier')
+    current_order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True, blank=True, related_name='order_courier')
 
     def __str__(self):
         return f'{self.courier} - {self.status_courier}'
