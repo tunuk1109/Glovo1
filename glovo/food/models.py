@@ -40,6 +40,12 @@ class Store(models.Model):
     def __str__(self):
         return self.store_name
 
+    def get_avg_rating(self):
+        rating = self.store_rating.all()
+        if rating.exists():
+            return round(sum([i.rating for i in rating]) / rating.count(), 1)
+
+
 
 class ContactInfo(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
@@ -60,7 +66,7 @@ class Cart(models.Model):
 
 
 class Product(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='product')
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product_name = models.CharField(max_length=64)
     product_image = models.ImageField(upload_to='product_images', null=True, blank=True)
@@ -135,7 +141,7 @@ class Courier(models.Model):
 
 class ReviewStore(models.Model):
     client = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    store = models.ForeignKey(Store, on_delete=models.CASCADE)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='store_rating')
     rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
     comment = models.TextField()
     created_date = models.DateField(auto_now_add=True)

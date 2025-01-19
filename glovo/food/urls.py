@@ -3,7 +3,6 @@ from .views import *
 from django.urls import path, include
 
 router = routers.SimpleRouter()
-router.register(r'users', UserProfileViewSet, basename='users_list'),
 router.register(r'cart', CartViewSet, basename='cart_list'),
 router.register(r'carItem', CartItemViewSet, basename='carItem_list'),
 router.register(r'productCombo', ProductComboViewSet, basename='productCombo_list'),
@@ -22,5 +21,7 @@ urlpatterns = [
     path('category/<int:pk>/', CategoryDetailAPIView.as_view(), name='category_detail'),
     path('product/', ProductListAPIVew.as_view(), name='product_list'),
     path('product/<int:pk>/', ProductDetailAPIVew.as_view(), name='product_detail'),
+    path('users/', UserProfileAPIView.as_view(), name='user_list'),
+    path('users/<int:pk>/', UserProfileDetailAPIView.as_view(), name='users_detail'),
 
 ]

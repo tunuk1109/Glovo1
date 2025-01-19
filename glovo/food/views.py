@@ -3,9 +3,14 @@ from .models import *
 from .serializers import  *
 
 
-class UserProfileViewSet(viewsets.ModelViewSet):
+class UserProfileAPIView(generics.ListAPIView):
     queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
+    serializer_class = UserProfileListSerializer
+
+
+class UserProfileDetailAPIView(generics.RetrieveAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileDetailSerializer
 
 
 class CategoryListAPIView(generics.ListAPIView):
@@ -35,9 +40,11 @@ class ProductListAPIVew(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductListSerializer
 
+
 class ProductDetailAPIVew(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductDetailSerializer
+
 
 class ProductComboViewSet(viewsets.ModelViewSet):
     queryset = ProductCombo.objects.all()
