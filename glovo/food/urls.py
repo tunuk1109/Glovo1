@@ -5,7 +5,6 @@ from django.urls import path, include
 router = routers.SimpleRouter()
 router.register(r'users', UserProfileViewSet, basename='users_list'),
 router.register(r'category', CategoryViewSet, basename='category_list'),
-router.register(r'store', StoreViewSet, basename='store_list'),
 router.register(r'cart', CartViewSet, basename='cart_list'),
 router.register(r'carItem', CarItemViewSet, basename='carItem_list'),
 router.register(r'product', ProductViewSet, basename='product_list'),
@@ -19,4 +18,7 @@ router.register(r'ratingCourier', RatingCourierViewSet, basename='ratingCourier_
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('store/', StoreListAPIView.as_view(), name='store_list'),
+    path('store/<int:pk>/', StoreDetailAPIView.as_view(), name='store_detail'),
+
 ]

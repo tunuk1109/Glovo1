@@ -13,9 +13,13 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
 
 
-class StoreViewSet(viewsets.ModelViewSet):
+class StoreListAPIView(generics.ListAPIView):
     queryset = Store.objects.all()
-    serializer_class = StoreSerializer
+    serializer_class = StoreListSerializer
+
+class StoreDetailAPIView(generics.RetrieveAPIView):
+    queryset = Store.objects.all()
+    serializer_class = StoreDetailSerializer
 
 
 class CartViewSet(viewsets.ModelViewSet):

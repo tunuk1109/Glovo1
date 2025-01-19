@@ -80,7 +80,12 @@ class RatingCourierSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class StoreSerializer(serializers.ModelSerializer):
+class StoreListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Store
+        fields = ['id', 'store_name', 'store_image']
+
+class StoreDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Store
         fields = '__all__'
