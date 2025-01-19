@@ -63,7 +63,7 @@ class Product(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product_name = models.CharField(max_length=64)
-    product_image = models.ImageField(upload_to='product_images')
+    product_image = models.ImageField(upload_to='product_images', null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
 
@@ -83,7 +83,7 @@ class CarItem(models.Model):
 class ProductCombo(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='combo')
     combo_name = models.CharField(max_length=32)
-    combo_image = models.ImageField(upload_to='combo_images')
+    combo_image = models.ImageField(upload_to='combo_images', null=True, blank=True)
     combo_price = DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
 
