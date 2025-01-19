@@ -29,7 +29,7 @@ class Category(models.Model):
 
 
 class Store(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='category_store')
     store_image = models.ImageField(upload_to='store_images', null=True, blank=True)
     owner = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     store_name = models.CharField(max_length=32, unique=True)
@@ -71,7 +71,7 @@ class Product(models.Model):
 
 
 class CarItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='cart_cart_item')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField(default=1)
 
@@ -80,7 +80,7 @@ class CarItem(models.Model):
 
 
 class ProductCombo(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='combo')
     combo_name = models.CharField(max_length=32)
     combo_image = models.ImageField(upload_to='combo_images')
     combo_price = DecimalField(max_digits=10, decimal_places=2)

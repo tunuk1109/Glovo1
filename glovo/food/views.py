@@ -8,9 +8,13 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     serializer_class = UserProfileSerializer
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryListAPIView(generics.ListAPIView):
     queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+    serializer_class = CategoryListSerializer
+
+class CategoryDetailAPIView(generics.RetrieveAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategoryDetailSerializer
 
 
 class StoreListAPIView(generics.ListAPIView):
@@ -27,19 +31,22 @@ class CartViewSet(viewsets.ModelViewSet):
     serializer_class = CartSerializer
 
 
-class ProductViewSet(viewsets.ModelViewSet):
+class ProductListAPIVew(generics.ListAPIView):
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+    serializer_class = ProductListSerializer
 
+class ProductDetailAPIVew(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductDetailSerializer
 
 class ProductComboViewSet(viewsets.ModelViewSet):
     queryset = ProductCombo.objects.all()
     serializer_class = ProductComboSerializer
 
 
-class CarItemViewSet(viewsets.ModelViewSet):
+class CartItemViewSet(viewsets.ModelViewSet):
     queryset = CarItem.objects.all()
-    serializer_class = CarItemSerializer
+    serializer_class = CartItemSerializer
 
 
 class BurgersViewSet(viewsets.ModelViewSet):

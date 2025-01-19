@@ -11,13 +11,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UserProfileSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['first_name', 'lasts_name']
+        fields = ['first_name', 'last_name']
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class CategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['category_name']
 
 
 class ContactInfoSerializer(serializers.ModelSerializer):
@@ -32,10 +32,10 @@ class CartSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = ['id', 'store', 'product_name', 'product_image', 'price', 'description']
 
 
 class ProductComboSerializer(serializers.ModelSerializer):
@@ -44,11 +44,18 @@ class ProductComboSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CarItemSerializer(serializers.ModelSerializer):
+class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CarItem
         fields = '__all__'
 
+
+class ProductDetailSerializer(serializers.ModelSerializer):
+    cart_cart_item = CartItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Product
+        fields = ['product_name', 'product_image', 'price', 'cart_cart_item', 'description']
 
 class BurgersSerializer(serializers.ModelSerializer):
     class Meta:
@@ -81,68 +88,25 @@ class RatingCourierSerializer(serializers.ModelSerializer):
 
 
 class StoreListSerializer(serializers.ModelSerializer):
+    category = CategoryListSerializer()
+
     class Meta:
         model = Store
-        fields = ['id', 'store_name', 'store_image']
+        fields = ['id', 'store_name', 'store_image', 'category']
 
 class StoreDetailSerializer(serializers.ModelSerializer):
+    owner = UserProfileSimpleSerializer()
+    category = CategoryListSerializer()
+    combo = ProductComboSerializer(many=True, read_only=True)
+
     class Meta:
         model = Store
-        fields = '__all__'
+        fields = ['store_image', 'store_name', 'description', 'combo', 'address', 'category', 'owner',]
 
 
+class CategoryDetailSerializer(serializers.ModelSerializer):
+    category_store = StoreListSerializer(many=True, read_only=True)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    class Meta:
+        model = Category
+        fields = ['category_name', 'category_store']
