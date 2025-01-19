@@ -1,4 +1,3 @@
-from PIL.BlpImagePlugin import Format
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -46,9 +45,8 @@ class Store(models.Model):
             return round(sum([i.rating for i in rating]) / rating.count(), 1)
 
 
-
 class ContactInfo(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='contact')
     title = models.CharField(max_length=32)
     phone_numbers = PhoneNumberField()
     social_network = models.CharField(max_length=32, null=True, blank=True)

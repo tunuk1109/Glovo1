@@ -26,9 +26,31 @@ class StoreListAPIView(generics.ListAPIView):
     queryset = Store.objects.all()
     serializer_class = StoreListSerializer
 
+
 class StoreDetailAPIView(generics.RetrieveAPIView):
     queryset = Store.objects.all()
     serializer_class = StoreDetailSerializer
+
+
+class StoreOwnerListAPIView(generics.ListAPIView):
+    queryset = Store.objects.all()
+    serializer_class = StoreListSerializer
+
+    def get_queryset(self):
+        return Store.objects.filter(owner=self.request.user)
+
+
+class StoreOwnerEditAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Store.objects.all()
+    serializer_class = StoreListOwnerSerializer
+
+    def get_queryset(self):
+        return Store.objects.filter(owner=self.request.user)
+
+
+class StoreCreateAPIView(generics.CreateAPIView):
+    queryset = Store.objects.all()
+    serializer_class = StoreListOwnerSerializer
 
 
 class CartViewSet(viewsets.ModelViewSet):
