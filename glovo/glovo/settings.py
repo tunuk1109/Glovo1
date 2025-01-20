@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'food',
     'phonenumber_field',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -149,3 +150,8 @@ MEDIA_URL = '/media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'food.UserProfile'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 3
+}

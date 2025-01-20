@@ -39,10 +39,22 @@ class ContactInfoSerializer(serializers.ModelSerializer):
         fields = ['title', 'phone_numbers', 'social_network']
 
 
-class CartSerializer(serializers.ModelSerializer):
+class CartListSerializer(serializers.ModelSerializer):
+    user = UserProfileSimpleSerializer()
+    created_date = serializers.DateTimeField(format=('%d-%m-%Y %H:%M'))
+
     class Meta:
         model = Cart
-        fields = '__all__'
+        fields = ['id', 'user', 'created_date']
+
+
+class CartDetailSerializer(serializers.ModelSerializer):
+    user = UserProfileSimpleSerializer()
+    created_date = serializers.DateTimeField(format=('%d-%m-%Y %H:%M'))
+
+    class Meta:
+        model = Cart
+        fields = ['user', 'created_date']
 
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -57,14 +69,32 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['product_name', 'product_image', 'price', 'description']
 
 
-class CartItemSerializer(serializers.ModelSerializer):
+class CartItemListSerializer(serializers.ModelSerializer):
+    cart_cart_item = CartListSerializer()
+    product_cart = ProductListSerializer()
+
     class Meta:
         model = CarItem
+        fields = ['id', 'cart_cart_item', 'product_cart']
+
+
+class CartItemDetailSerializer(serializers.ModelSerializer):
+    cart_cart_item = CartListSerializer()
+    product_cart = ProductListSerializer()
+
+    class Meta:
+        model = CarItem
+        fields = ['cart_cart_item', 'product_cart', 'quantity']
+
+
+class ProductSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
         fields = '__all__'
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
-    cart_cart_item = CartItemSerializer(many=True, read_only=True)
+    cart_cart_item = CartItemListSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
@@ -96,6 +126,12 @@ class ReviewStoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReviewStore
         fields = ['client', 'comment', 'rating', 'created_date']
+
+
+class ReviewStoreSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReviewStore
+        fields = '__all__'
 
 
 class RatingCourierSerializer(serializers.ModelSerializer):
@@ -138,12 +174,18 @@ class CategoryDetailSerializer(serializers.ModelSerializer):
         fields = ['category_name', 'category_store']
 
 
+class ProductComboSimpleSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = ProductCombo
+        fields = '__all__'
+
+
 class ProductComboSerializer(serializers.ModelSerializer):
     store = StoreSimpleSerializer()
 
     class Meta:
         model = ProductCombo
-        fields = ['combo_name', 'combo_image', 'combo_price', 'description', 'store']
+        fields = ['id', 'combo_name', 'combo_image', 'combo_price', 'description', 'store']
 
 
 class StoreDetailSerializer(serializers.ModelSerializer):
