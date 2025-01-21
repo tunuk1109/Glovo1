@@ -18,7 +18,7 @@ class UserProfile(AbstractUser):
     user_image = models.ImageField(upload_to='user_images', null=True, blank=True)
 
     def __str__(self):
-        return f'{self.first_name}, {self.last_name}'
+        return f'{self.first_name}, {self.last_name}, {self.status}'
 
 
 class Category(models.Model):
@@ -96,12 +96,12 @@ class ProductCombo(models.Model):
 
 
 class Burgers(models.Model):
+    burger_name = models.CharField(max_length=32, null=True, blank=True)
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    burgers_image = models.ImageField(upload_to='burger_images')
+    burgers_image = models.ImageField(upload_to='burger_images', null=True, blank=True)
 
     def __str__(self):
-        return f'{self.product}'
+        return f'{self.burger_name}'
 
 
 class Order(models.Model):
@@ -149,9 +149,11 @@ class ReviewStore(models.Model):
 
 
 class RatingCourier(models.Model):
-    courier = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    courier = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='courier_rating')
     stars = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
     created_date = models.DateField(auto_now_add=True)
+    client = models.ForeignKey(UserProfile, on_delete=models.CASCADE,
+                               null=True, blank=True, related_name='client_for_rating')
 
     def __str__(self):
-        return f'{self.courier} - {self.stars}'
+        return f'{self.client} - {self.courier} - {self.stars}'

@@ -20,6 +20,10 @@ class UserProfileSimpleSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ['first_name', 'last_name', 'status']
 
+class UserProfileCourierSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['first_name', 'last_name']
 
 class UserProfileClientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -70,21 +74,15 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class CartItemListSerializer(serializers.ModelSerializer):
-    cart_cart_item = CartListSerializer()
-    product_cart = ProductListSerializer()
-
     class Meta:
         model = CarItem
-        fields = ['id', 'cart_cart_item', 'product_cart']
+        fields = ['id', 'cart', 'product']
 
 
 class CartItemDetailSerializer(serializers.ModelSerializer):
-    cart_cart_item = CartListSerializer()
-    product_cart = ProductListSerializer()
-
     class Meta:
         model = CarItem
-        fields = ['cart_cart_item', 'product_cart', 'quantity']
+        fields = ['cart', 'product', 'quantity']
 
 
 class ProductSimpleSerializer(serializers.ModelSerializer):
@@ -92,6 +90,10 @@ class ProductSimpleSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
+class ProductClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['product_name']
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     cart_cart_item = CartItemListSerializer(many=True, read_only=True)
@@ -101,23 +103,50 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         fields = ['product_name', 'product_image', 'price', 'cart_cart_item', 'description']
 
 
-class BurgersSerializer(serializers.ModelSerializer):
+class ProductComboClientSerializers(serializers.ModelSerializer):
     class Meta:
-        model = Burgers
-        fields = '__all__'
-
+        model = ProductCombo
+        fields =['combo_name']
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
 
-
-class CourierSerializer(serializers.ModelSerializer):
+class OrderOwnerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Courier
+        model = Order
         fields = '__all__'
 
+class OrderCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+class OrderClientSerializer(serializers.ModelSerializer):
+    client = UserProfileCourierSerializer()
+    product_combo = ProductComboClientSerializers()
+    product = ProductClientSerializer()
+    created_date = serializers.DateTimeField(format= '%d-%m-%Y  %H:%M')
+
+    class Meta:
+        model = Order
+        fields = ['client', 'product', 'product_combo', 'delivery_address', 'created_date']
+
+class CourierDetailSerializer(serializers.ModelSerializer):
+    courier =UserProfileCourierSerializer()
+    current_order = OrderClientSerializer()
+
+    class Meta:
+        model = Courier
+        fields = ['status_courier', 'courier', 'current_order' ]
+
+class CourierListSerializer(serializers.ModelSerializer):
+    courier = UserProfileCourierSerializer()
+
+    class Meta:
+        model = Courier
+        fields = ['id', 'courier']
 
 class ReviewStoreSerializer(serializers.ModelSerializer):
     client = UserProfileClientSerializer()
@@ -134,11 +163,21 @@ class ReviewStoreSimpleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class RatingCourierSerializer(serializers.ModelSerializer):
+class RatingCourierListSerializer(serializers.ModelSerializer):
+    courier = UserProfileCourierSerializer()
+
     class Meta:
         model = RatingCourier
-        fields = '__all__'
+        fields = ['id', 'courier']
 
+class RatingCourierDetailSerializer(serializers.ModelSerializer):
+    courier = UserProfileCourierSerializer()
+    client = UserProfileCourierSerializer()
+    created_date = serializers.DateField(format=('%d-%m-%Y'))
+
+    class Meta:
+        model = RatingCourier
+        fields = ['courier', 'stars', 'client', 'created_date']
 
 class StoreSimpleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -200,3 +239,18 @@ class StoreDetailSerializer(serializers.ModelSerializer):
         model = Store
         fields = ['store_image', 'store_name', 'description', 'category', 'contact', 'product',
                   'combo', 'address', 'owner', 'store_rating']
+
+
+class BurgersListSerializer(serializers.ModelSerializer):
+    store = StoreSimpleSerializer()
+
+    class Meta:
+        model = Burgers
+        fields = ['id', 'burger_name', 'store', 'burgers_image']
+
+class BurgersDetailSerializer(serializers.ModelSerializer):
+    store = StoreSimpleSerializer()
+
+    class Meta:
+        model = Burgers
+        fields = ['burger_name', 'store', 'burgers_image']
