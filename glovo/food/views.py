@@ -71,23 +71,11 @@ class StoreCreateAPIView(generics.CreateAPIView):
     permission_classes = [CheckOwner]
 
 
-class CartAPIView(generics.ListAPIView):
-    queryset = Cart.objects.all()
-    serializer_class = CartListSerializer
-
-
-class CartDetailAPIView(generics.RetrieveAPIView):
-    queryset = Cart.objects.all()
-    serializer_class = CartDetailSerializer
-
-
-
 class ProductListAPIVew(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductListSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProductFilter
-
 
 
 class ProductDetailAPIVew(generics.RetrieveAPIView):
@@ -152,26 +140,18 @@ class ProductComboOwnerEditAPIView(generics.RetrieveUpdateDestroyAPIView):
         return ProductCombo.objects.filter(store__owner=self.request.user)
 
 
+class CartAPIView(generics.ListAPIView):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+
+
 class CartItemListAPIView(generics.ListAPIView):
     queryset = CarItem.objects.all()
-    serializer_class = CartItemListSerializer
+    serializer_class = CartItemSerializer
 
     def get_queryset(self):
         return CarItem.objects.filter(cart__user=self.request.user)
 
-
-class CartItemDetailAPIView(generics.RetrieveAPIView):
-    queryset = CarItem.objects.all()
-    serializer_class = CartItemDetailSerializer
-
-
-class BurgersListAPIView(generics.ListAPIView):
-    queryset = Burgers.objects.all()
-    serializer_class = BurgersListSerializer
-
-class BurgersDetailAPIView(generics.RetrieveAPIView):
-    queryset = Burgers.objects.all()
-    serializer_class = BurgersDetailSerializer
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
@@ -180,6 +160,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 class OrderCreateAPIView(generics.CreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderCreateSerializer
+
 
 class OrderOwnerAPIView(generics.ListAPIView):
     queryset = Order.objects.all()

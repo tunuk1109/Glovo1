@@ -44,6 +44,11 @@ class Store(models.Model):
         if rating.exists():
             return round(sum([i.rating for i in rating]) / rating.count(), 1)
 
+    def get_count_people(self):
+        comment = self.store_rating.all()
+        if comment.exists():
+            return comment.count()
+        return 0
 
 class ContactInfo(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='contact')
@@ -83,6 +88,9 @@ class CarItem(models.Model):
     def __str__(self):
         return f'{self.cart}'
 
+    def get_total_price(self):
+        return self.product.price * self.quantity
+
 
 class ProductCombo(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='combo')
@@ -93,15 +101,6 @@ class ProductCombo(models.Model):
 
     def __str__(self):
         return f'{self.combo_name}'
-
-
-class Burgers(models.Model):
-    burger_name = models.CharField(max_length=32, null=True, blank=True)
-    store = models.ForeignKey(Store, on_delete=models.CASCADE)
-    burgers_image = models.ImageField(upload_to='burger_images', null=True, blank=True)
-
-    def __str__(self):
-        return f'{self.burger_name}'
 
 
 class Order(models.Model):

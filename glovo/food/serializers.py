@@ -20,10 +20,12 @@ class UserProfileSimpleSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ['first_name', 'last_name', 'status']
 
+
 class UserProfileCourierSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['first_name', 'last_name']
+
 
 class UserProfileClientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -43,22 +45,13 @@ class ContactInfoSerializer(serializers.ModelSerializer):
         fields = ['title', 'phone_numbers', 'social_network']
 
 
-class CartListSerializer(serializers.ModelSerializer):
+class CartSerializer(serializers.ModelSerializer):
     user = UserProfileSimpleSerializer()
     created_date = serializers.DateTimeField(format=('%d-%m-%Y %H:%M'))
 
     class Meta:
         model = Cart
         fields = ['id', 'user', 'created_date']
-
-
-class CartDetailSerializer(serializers.ModelSerializer):
-    user = UserProfileSimpleSerializer()
-    created_date = serializers.DateTimeField(format=('%d-%m-%Y %H:%M'))
-
-    class Meta:
-        model = Cart
-        fields = ['user', 'created_date']
 
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -73,18 +66,6 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['product_name', 'product_image', 'price', 'description']
 
 
-class CartItemListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CarItem
-        fields = ['id', 'cart', 'product']
-
-
-class CartItemDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CarItem
-        fields = ['cart', 'product', 'quantity']
-
-
 class ProductSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
@@ -95,8 +76,22 @@ class ProductClientSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['product_name']
 
+
+class CartItemSerializer(serializers.ModelSerializer):
+    product = ProductListSerializer(read_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), write_only=True, source='product')
+    get_total_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CarItem
+        fields = ['id', 'cart', 'product', 'product_id', 'quantity', 'get_total_price']
+
+    def get_total_price(self, obj):
+        return obj.get_total_price()
+
+
 class ProductDetailSerializer(serializers.ModelSerializer):
-    cart_cart_item = CartItemListSerializer(many=True, read_only=True)
+    cart_cart_item = CartItemSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
@@ -189,13 +184,21 @@ class StoreListSerializer(serializers.ModelSerializer):
     category = CategoryListSerializer()
     store_rating = ReviewStoreSerializer(many=True, read_only=True)
     get_avg_rating = serializers.ModelSerializer()
+    get_count_people = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Store
-        fields = ['id', 'store_name', 'store_image', 'category', 'store_rating', 'get_avg_rating']
+        fields = ['id', 'store_name', 'store_image', 'category', 'store_rating', 'get_avg_rating', 'get_count_people']
 
     def get_avg_rating(self, obj):
         return obj.get_avg_rating()
+
+    def get_count_people(self):
+        comment = self.store_rating.all()
+        if comment.exists():
+            return comment.count()
+        return 0
 
 
 class StoreListOwnerSerializer(serializers.ModelSerializer):
@@ -241,16 +244,5 @@ class StoreDetailSerializer(serializers.ModelSerializer):
                   'combo', 'address', 'owner', 'store_rating']
 
 
-class BurgersListSerializer(serializers.ModelSerializer):
-    store = StoreSimpleSerializer()
 
-    class Meta:
-        model = Burgers
-        fields = ['id', 'burger_name', 'store', 'burgers_image']
 
-class BurgersDetailSerializer(serializers.ModelSerializer):
-    store = StoreSimpleSerializer()
-
-    class Meta:
-        model = Burgers
-        fields = ['burger_name', 'store', 'burgers_image']

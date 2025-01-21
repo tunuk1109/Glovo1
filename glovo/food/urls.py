@@ -24,9 +24,7 @@ urlpatterns = [
     path('combo_owner/', ProductOwnerListAPIView.as_view(), name='combo_owner_list'),
     path('combo_owner/<int:pk>/', ProductComboOwnerEditAPIView.as_view(), name='combo_owner_detail'),
     path('cart/', CartAPIView.as_view(), name='cart_list'),
-    path('cart/<int:pk>/', CartDetailAPIView.as_view(), name='cart_detail'),
     path('cart_item/', CartItemListAPIView.as_view(), name='cart_item_list'),
-    path('cart_item/<int:pk>/', CartItemDetailAPIView.as_view(), name='cart_item_detail'),
     path('review/', ReviewStoreListAPIView.as_view(), name='review_list'),
     path('review_create/', ReviewStoreCreateAPIView.as_view(), name='review_create'),
     path('courier/', CourierListAPIView.as_view(), name='courier_list'),
@@ -36,6 +34,5 @@ urlpatterns = [
     path('rating_create/', RatingCourierCreateAPIView.as_view(), name='rating_create'),
     path('order_owner/', OrderOwnerAPIView.as_view(), name='order_owner_list'),
     path('order_create/', OrderCreateAPIView.as_view(), name='order_create'),
-    path('burgers/', BurgersListAPIView.as_view(), name='burger_list'),
-    path('burgers/<int:pk>/', BurgersDetailAPIView.as_view(), name='burger_detail'),
+
 ]
