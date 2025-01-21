@@ -37,7 +37,7 @@ class Store(models.Model):
     address = models.CharField(max_length=64)
 
     def __str__(self):
-        return self.store_name
+        return f'{self.store_name} - {self.owner}'
 
     def get_avg_rating(self):
         rating = self.store_rating.all()
@@ -113,9 +113,10 @@ class Order(models.Model):
         ('delivered', 'delivered'),
         ('cancelled', 'cancelled')
     )
-    order_status = models.CharField(choices=STATUS_ORDER_CHOICES, max_length=16)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
-    product_combo = models.ForeignKey(ProductCombo, on_delete=models.CASCADE)
+    product_combo = models.ForeignKey(ProductCombo, on_delete=models.CASCADE, null=True, blank=True)
+    order_status = models.CharField(choices=STATUS_ORDER_CHOICES, max_length=16)
     delivery_address = models.CharField(max_length=32)
     created_date = models.DateTimeField(auto_now_add=True)
 

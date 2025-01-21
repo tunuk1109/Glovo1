@@ -40,15 +40,10 @@ class StoreListAPIView(generics.ListAPIView):
     filterset_fields = ['category']
     search_fields = ['store_name']
     ordering_fields = ['owner']
-    permission_classes = [CheckClient]
-
-
 
 class StoreDetailAPIView(generics.RetrieveAPIView):
     queryset = Store.objects.all()
     serializer_class = StoreDetailSerializer
-    permission_classes = [CheckClient]
-
 
 class StoreOwnerListAPIView(generics.ListAPIView):
     queryset = Store.objects.all()
@@ -153,36 +148,31 @@ class CartItemListAPIView(generics.ListAPIView):
         return CarItem.objects.filter(cart__user=self.request.user)
 
 
-class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
-    serializer_class = OrderSerializer
-
 class OrderCreateAPIView(generics.CreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderCreateSerializer
-
+    permission_classes = [CheckOwner, CheckCourier]
 
 class OrderOwnerAPIView(generics.ListAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderOwnerSerializer
+    permission_classes = [CheckOwner, CheckCourier]
 
 
 class CourierListAPIView(generics.ListAPIView):
     queryset = Courier.objects.all()
     serializer_class = CourierListSerializer
-    permission_classes = [CheckCourier]
+    permission_classes = [CheckCourier, CheckOwner]
 
 class CourierDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Courier.objects.all()
     serializer_class = CourierDetailSerializer
-    permission_classes = [CheckCourier]
+    permission_classes = [CheckCourier, CheckOwner]
 
 
 class ReviewStoreListAPIView(generics.ListAPIView):
     queryset = ReviewStore.objects.all()
     serializer_class = ReviewStoreSerializer
-    permission_classes = [CheckClient]
-
 
 class ReviewStoreCreateAPIView(generics.CreateAPIView):
     queryset = ReviewStore.objects.all()
@@ -196,12 +186,10 @@ class ReviewStoreCreateAPIView(generics.CreateAPIView):
 class RatingCourierListAPIView(generics.ListAPIView):
     queryset = RatingCourier.objects.all()
     serializer_class = RatingCourierListSerializer
-    permission_classes = [CheckClient]
 
 class RatingCourierDetailAPIView(generics.RetrieveAPIView):
     queryset = RatingCourier.objects.all()
     serializer_class = RatingCourierDetailSerializer
-    permission_classes = [CheckClient]
 
 class RatingCourierCreateAPIView(generics.CreateAPIView):
     queryset = RatingCourier.objects.all()
