@@ -45,6 +45,13 @@ INSTALLED_APPS = [
     'food',
     'phonenumber_field',
     'drf_yasg',
+    'django_filters',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.github',
+
 ]
 
 MIDDLEWARE = [
@@ -56,6 +63,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
 
 ]
 
@@ -153,5 +161,14 @@ AUTH_USER_MODEL = 'food.UserProfile'
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 3
+    'PAGE_SIZE': 3,
+
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

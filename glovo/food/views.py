@@ -1,7 +1,10 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, permissions
 from .models import *
 from .serializers import *
 from .paginations import StorePagination
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+from .filters import ProductFilter
 
 
 class UserProfileAPIView(generics.ListAPIView):
@@ -28,6 +31,10 @@ class StoreListAPIView(generics.ListAPIView):
     queryset = Store.objects.all()
     serializer_class = StoreListSerializer
     pagination_class = StorePagination
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['category']
+    search_fields = ['store_name']
+    ordering_fields = ['owner']
 
 
 class StoreDetailAPIView(generics.RetrieveAPIView):
@@ -69,6 +76,9 @@ class CartDetailAPIView(generics.RetrieveAPIView):
 class ProductListAPIVew(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductListSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
+
 
 
 class ProductDetailAPIVew(generics.RetrieveAPIView):
@@ -99,7 +109,9 @@ class ProductOwnerEditAPIView(generics.RetrieveUpdateDestroyAPIView):
 class ProductComboListAPIView(generics.ListAPIView):
     queryset = ProductCombo.objects.all()
     serializer_class = ProductComboSerializer
-
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_fields = ['store']
+    search_fields = ['combo_name']
 
 class ProductComboCreateAPIView(generics.CreateAPIView):
     queryset = ProductCombo.objects.all()
@@ -117,6 +129,9 @@ class ProductComboOwnerListAPIView(generics.ListAPIView):
 class ProductComboOwnerEditAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProductCombo.objects.all()
     serializer_class = ProductComboSimpleSerializers
+
+    def get_queryset(self):
+        return ProductCombo.objects.filter(store__owner=self.request.user)
 
 
 class CartItemListAPIView(generics.ListAPIView):

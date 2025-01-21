@@ -35,5 +35,6 @@ urlpatterns = i18n_patterns (
     path('admin/', admin.site.urls),
     path('', include('food.urls')),
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('accounts/', include('allauth.urls')),
 
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
