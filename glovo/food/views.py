@@ -2,13 +2,11 @@ from rest_framework import viewsets, generics, permissions
 from .models import *
 from .serializers import *
 from .paginations import StorePagination
-<<<<<<< HEAD
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from .filters import ProductFilter
-=======
 from .permissions import CheckOwner, CheckOwnerEdit,CheckClient, CheckCourier
->>>>>>> 6ac662759b3168f52662cda01842e06a164adf03
+
 
 
 class UserProfileAPIView(generics.ListAPIView):
@@ -38,14 +36,12 @@ class StoreListAPIView(generics.ListAPIView):
     queryset = Store.objects.all()
     serializer_class = StoreListSerializer
     pagination_class = StorePagination
-<<<<<<< HEAD
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['category']
     search_fields = ['store_name']
     ordering_fields = ['owner']
-=======
     permission_classes = [CheckClient]
->>>>>>> 6ac662759b3168f52662cda01842e06a164adf03
+
 
 
 class StoreDetailAPIView(generics.RetrieveAPIView):
