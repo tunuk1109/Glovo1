@@ -59,6 +59,9 @@ class StoreOwnerEditAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = StoreListOwnerSerializer
     permission_classes = [CheckOwner, CheckOwnerEdit]
 
+    def get_queryset(self):
+        return Store.objects.filter(owner=self.request.user)
+
 
 class StoreCreateAPIView(generics.CreateAPIView):
     queryset = Store.objects.all()
@@ -127,9 +130,6 @@ class ProductComboOwnerEditAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProductCombo.objects.all()
     serializer_class = ProductComboSimpleSerializers
     permission_classes = [CheckOwner]
-
-    def get_queryset(self):
-        return Product.objects.filter(store__owner=self.request.user)
 
     def get_queryset(self):
         return ProductCombo.objects.filter(store__owner=self.request.user)

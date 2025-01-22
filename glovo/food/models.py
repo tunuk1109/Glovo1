@@ -67,6 +67,10 @@ class Cart(models.Model):
     def __str__(self):
         return f'{self.user}'
 
+    def get_total_price(self):
+        total_price = sum(item.get_total_price() for item in self.cart_cart_item.all())
+        return total_price
+
 
 class Product(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='product')
