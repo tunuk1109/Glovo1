@@ -40,15 +40,19 @@ class Store(models.Model):
         return f'{self.store_name} - {self.owner}'
 
     def get_avg_rating(self):
-        rating = self.store_rating.all()
-        if rating.exists():
-            return round(sum([i.rating for i in rating]) / rating.count(), 1)
+        ratings = self.store_rating.all()
+        if ratings.exists():
+            avg_rating = round(sum([i.rating for i in ratings]) / ratings.count(), 1)
+            percentage = round(avg_rating / 10) * 100, 1
+            return f'{percentage}%'
+        return f'0%'
 
     def get_count_people(self):
-        comment = self.store_rating.all()
-        if comment.exists():
-            return comment.count()
-        return 0
+        comment_count = self.store_rating.count()
+        if comment_count > 3:
+            return "3+"
+        return str(comment_count)
+
 
 class ContactInfo(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='contact')

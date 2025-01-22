@@ -34,5 +34,8 @@ urlpatterns = [
     path('rating_create/', RatingCourierCreateAPIView.as_view(), name='rating_create'),
     path('order_owner/', OrderOwnerAPIView.as_view(), name='order_owner_list'),
     path('order_create/', OrderCreateAPIView.as_view(), name='order_create'),
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', CustomLoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
 
 ]
