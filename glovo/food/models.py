@@ -18,7 +18,7 @@ class UserProfile(AbstractUser):
     user_image = models.ImageField(upload_to='user_images', null=True, blank=True)
 
     def __str__(self):
-        return f'{self.first_name}, {self.last_name}'
+        return f'{self.first_name}, {self.last_name}, {self.status}'
 
 
 class Category(models.Model):
@@ -29,7 +29,7 @@ class Category(models.Model):
 
 
 class Store(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='category_store')
     store_image = models.ImageField(upload_to='store_images', null=True, blank=True)
     owner = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     store_name = models.CharField(max_length=32, unique=True)
@@ -37,11 +37,25 @@ class Store(models.Model):
     address = models.CharField(max_length=64)
 
     def __str__(self):
-        return self.store_name
+        return f'{self.store_name} - {self.owner}'
+
+    def get_avg_rating(self):
+        ratings = self.store_rating.all()
+        if ratings.exists():
+            avg_rating = round(sum([i.rating for i in ratings]) / ratings.count(), 1)
+            percentage = round(avg_rating / 10) * 100, 1
+            return f'{percentage}%'
+        return f'0%'
+
+    def get_count_people(self):
+        comment_count = self.store_rating.count()
+        if comment_count > 3:
+            return "3+"
+        return str(comment_count)
 
 
 class ContactInfo(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='contact')
     title = models.CharField(max_length=32)
     phone_numbers = PhoneNumberField()
     social_network = models.CharField(max_length=32, null=True, blank=True)
@@ -57,12 +71,16 @@ class Cart(models.Model):
     def __str__(self):
         return f'{self.user}'
 
+    def get_total_price(self):
+        total_price = sum(item.get_total_price() for item in self.cart_cart_item.all())
+        return total_price
+
 
 class Product(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='product')
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product_name = models.CharField(max_length=64)
-    product_image = models.ImageField(upload_to='product_images')
+    product_image = models.ImageField(upload_to='product_images', null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
 
@@ -71,32 +89,26 @@ class Product(models.Model):
 
 
 class CarItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='cart_cart_item')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_cart')
     quantity = models.PositiveSmallIntegerField(default=1)
 
     def __str__(self):
         return f'{self.cart}'
 
+    def get_total_price(self):
+        return self.product.price * self.quantity
+
 
 class ProductCombo(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='combo')
     combo_name = models.CharField(max_length=32)
-    combo_image = models.ImageField(upload_to='combo_images')
+    combo_image = models.ImageField(upload_to='combo_images', null=True, blank=True)
     combo_price = DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
 
     def __str__(self):
-        return self.combo_name
-
-
-class Burgers(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    burgers_image = models.ImageField(upload_to='burger_images')
-
-    def __str__(self):
-        return f'{self.product}'
+        return f'{self.combo_name}'
 
 
 class Order(models.Model):
@@ -109,10 +121,15 @@ class Order(models.Model):
         ('delivered', 'delivered'),
         ('cancelled', 'cancelled')
     )
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
+    product_combo = models.ForeignKey(ProductCombo, on_delete=models.CASCADE, null=True, blank=True)
     order_status = models.CharField(choices=STATUS_ORDER_CHOICES, max_length=16)
-    product_combo = models.ForeignKey(ProductCombo, on_delete=models.CASCADE)
     delivery_address = models.CharField(max_length=32)
     created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.courier}, {self.client}, {self.product}, {self.product_combo}'
 
 
 class Courier(models.Model):
@@ -122,7 +139,7 @@ class Courier(models.Model):
         ('busy', 'busy')
     )
     status_courier = models.CharField(choices=STATUS_CHOICES, max_length=16, default='available')
-    current_order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_courier')
+    current_order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True, blank=True, related_name='order_courier')
 
     def __str__(self):
         return f'{self.courier} - {self.status_courier}'
@@ -130,7 +147,7 @@ class Courier(models.Model):
 
 class ReviewStore(models.Model):
     client = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    store = models.ForeignKey(Store, on_delete=models.CASCADE)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='store_rating')
     rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
     comment = models.TextField()
     created_date = models.DateField(auto_now_add=True)
@@ -140,9 +157,11 @@ class ReviewStore(models.Model):
 
 
 class RatingCourier(models.Model):
-    courier = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    courier = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='courier_rating')
     stars = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
     created_date = models.DateField(auto_now_add=True)
+    client = models.ForeignKey(UserProfile, on_delete=models.CASCADE,
+                               null=True, blank=True, related_name='client_for_rating')
 
     def __str__(self):
-        return f'{self.courier} - {self.stars}'
+        return f'{self.client} - {self.courier} - {self.stars}'

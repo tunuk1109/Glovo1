@@ -1,64 +1,243 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, permissions, status
 from .models import *
-from .serializers import  *
+from .serializers import *
+from .paginations import StorePagination
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+from .filters import ProductFilter
+from .permissions import CheckOwner, CheckOwnerEdit,CheckClient, CheckCourier
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.response import Response
 
 
-class UserProfileViewSet(viewsets.ModelViewSet):
+class RegisterView(generics.CreateAPIView):
+    serializer_class = UserSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class CustomLoginView(TokenObtainPairView):
+    serializer_class = LoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception:
+            return Response({"detail": "Неверные учетные данные"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        user = serializer.validated_data
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class LogoutView(generics.GenericAPIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfileAPIView(generics.ListAPIView):
     queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
+    serializer_class = UserProfileListSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class UserProfileDetailAPIView(generics.RetrieveAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileDetailSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        return UserProfile.objects.filter(id=self.request.user.id)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryListAPIView(generics.ListAPIView):
     queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+    serializer_class = CategoryListSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+class CategoryDetailAPIView(generics.RetrieveAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategoryDetailSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-class StoreViewSet(viewsets.ModelViewSet):
+class StoreListAPIView(generics.ListAPIView):
     queryset = Store.objects.all()
-    serializer_class = StoreSerializer
+    serializer_class = StoreListSerializer
+    pagination_class = StorePagination
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['category']
+    search_fields = ['store_name']
+    ordering_fields = ['owner']
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class StoreDetailAPIView(generics.RetrieveAPIView):
+    queryset = Store.objects.all()
+    serializer_class = StoreDetailSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class StoreOwnerListAPIView(generics.ListAPIView):
+    queryset = Store.objects.all()
+    serializer_class = StoreListSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckOwner]
+
+    def get_queryset(self):
+        return Store.objects.filter(owner=self.request.user)
 
 
-class CartViewSet(viewsets.ModelViewSet):
-    queryset = Cart.objects.all()
-    serializer_class = CartSerializer
+class StoreOwnerEditAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Store.objects.all()
+    serializer_class = StoreListOwnerSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckOwner, CheckOwnerEdit]
+
+    def get_queryset(self):
+        return Store.objects.filter(owner=self.request.user)
 
 
-class ProductViewSet(viewsets.ModelViewSet):
+class StoreCreateAPIView(generics.CreateAPIView):
+    queryset = Store.objects.all()
+    serializer_class = StoreListOwnerSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckOwner]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+class ProductListAPIVew(generics.ListAPIView):
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+    serializer_class = ProductListSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class ProductDetailAPIVew(generics.RetrieveAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductDetailSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class ProductCreateAPIView(generics.CreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSimpleSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckOwner]
+
+class ProductOwnerListAPIView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductListSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckOwner]
+
+    def get_queryset(self):
+        return Product.objects.filter(store__owner=self.request.user)
+
+class ProductOwnerEditAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSimpleSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckOwner]
+
+    def get_queryset(self):
+        return Product.objects.filter(store__owner=self.request.user)
 
 
-class ProductComboViewSet(viewsets.ModelViewSet):
+class ProductComboListAPIView(generics.ListAPIView):
     queryset = ProductCombo.objects.all()
     serializer_class = ProductComboSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_fields = ['store']
+    search_fields = ['combo_name']
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class ProductComboCreateAPIView(generics.CreateAPIView):
+    queryset = ProductCombo.objects.all()
+    serializer_class = ProductSimpleSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckOwner]
 
 
-class CarItemViewSet(viewsets.ModelViewSet):
+class ProductComboOwnerListAPIView(generics.ListAPIView):
+    queryset = ProductCombo.objects.all()
+    serializer_class = StoreListSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckOwner]
+
+    def get_queryset(self):
+        return ProductCombo.objects.filter(store__owner=self.request.user)
+
+
+class ProductComboOwnerEditAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ProductCombo.objects.all()
+    serializer_class = ProductComboSimpleSerializers
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckOwner]
+
+    def get_queryset(self):
+        return ProductCombo.objects.filter(store__owner=self.request.user)
+
+
+class CartAPIView(generics.ListAPIView):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class CartItemListAPIView(generics.ListAPIView):
     queryset = CarItem.objects.all()
-    serializer_class = CarItemSerializer
+    serializer_class = CartItemSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def get_queryset(self):
+        return CarItem.objects.filter(cart__user=self.request.user)
 
-class BurgersViewSet(viewsets.ModelViewSet):
-    queryset = Burgers.objects.all()
-    serializer_class = BurgersSerializer
-
-
-class OrderViewSet(viewsets.ModelViewSet):
+class OrderCreateAPIView(generics.CreateAPIView):
     queryset = Order.objects.all()
-    serializer_class = OrderSerializer
+    serializer_class = OrderCreateSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckOwner, CheckCourier]
+
+class OrderOwnerAPIView(generics.ListAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderOwnerSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckOwner, CheckCourier]
 
 
-class CourierViewSet(viewsets.ModelViewSet):
+class CourierListAPIView(generics.ListAPIView):
     queryset = Courier.objects.all()
-    serializer_class = CourierSerializer
+    serializer_class = CourierListSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckCourier, CheckOwner]
+
+class CourierDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Courier.objects.all()
+    serializer_class = CourierDetailSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckCourier, CheckOwner]
 
 
-class ReviewStoreViewSet(viewsets.ModelViewSet):
+class ReviewStoreListAPIView(generics.ListAPIView):
     queryset = ReviewStore.objects.all()
     serializer_class = ReviewStoreSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class ReviewStoreCreateAPIView(generics.CreateAPIView):
+    queryset = ReviewStore.objects.all()
+    serializer_class = ReviewStoreSimpleSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckClient]
+
+    def get_queryset(self):
+        return ReviewStore.objects.filter(user=self.request.user)
 
 
-class RatingCourierViewSet(viewsets.ModelViewSet):
+class RatingCourierListAPIView(generics.ListAPIView):
     queryset = RatingCourier.objects.all()
-    serializer_class = RatingCourierSerializer
+    serializer_class = RatingCourierListSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class RatingCourierDetailAPIView(generics.RetrieveAPIView):
+    queryset = RatingCourier.objects.all()
+    serializer_class = RatingCourierDetailSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class RatingCourierCreateAPIView(generics.CreateAPIView):
+    queryset = RatingCourier.objects.all()
+    serializer_class = RatingCourierDetailSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CheckClient]
     

@@ -46,7 +46,6 @@ class StoreAdmin(TranslationAdmin):
 admin.site.register(UserProfile)
 admin.site.register(Cart)
 admin.site.register(CarItem)
-admin.site.register(Burgers)
 admin.site.register(Courier)
 admin.site.register(ReviewStore)
 admin.site.register(RatingCourier)
