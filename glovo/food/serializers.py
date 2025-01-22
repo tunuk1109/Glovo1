@@ -45,16 +45,20 @@ class ContactInfoSerializer(serializers.ModelSerializer):
         fields = ['title', 'phone_numbers', 'social_network']
 
 
-class CartSerializer(serializers.ModelSerializer):
-    user = UserProfileSimpleSerializer()
-    created_date = serializers.DateTimeField(format=('%d-%m-%Y %H:%M'))
-
-    class Meta:
-        model = Cart
-        fields = ['id', 'user', 'created_date']
-
-
 class ProductListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['id', 'store', 'product_name', 'product_image', 'price', 'description']
+
+class StoreSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Store
+        fields = ['store_name']
+
+
+class ProductSimpleCartSerializer(serializers.ModelSerializer):
+    store = StoreSimpleSerializer()
+
     class Meta:
         model = Product
         fields = ['id', 'store', 'product_name', 'product_image', 'price', 'description']
@@ -78,13 +82,23 @@ class ProductClientSerializer(serializers.ModelSerializer):
 
 
 class CartItemSerializer(serializers.ModelSerializer):
-    product = ProductListSerializer(read_only=True)
+    product = ProductSimpleCartSerializer(read_only=True)
     product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), write_only=True, source='product')
-    get_total_price = serializers.SerializerMethodField()
 
     class Meta:
         model = CarItem
         fields = ['id', 'cart', 'product', 'product_id', 'quantity', 'get_total_price']
+
+
+class CartSerializer(serializers.ModelSerializer):
+    user = UserProfileSimpleSerializer()
+    created_date = serializers.DateTimeField(format=('%d-%m-%Y %H:%M'))
+    cart_cart_item = CartItemSerializer(many=True, read_only=True)
+    total_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Cart
+        fields = ['id', 'user', 'cart_cart_item', 'created_date', 'total_price']
 
     def get_total_price(self, obj):
         return obj.get_total_price()
@@ -173,11 +187,6 @@ class RatingCourierDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = RatingCourier
         fields = ['courier', 'stars', 'client', 'created_date']
-
-class StoreSimpleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Store
-        fields = ['store_name']
 
 
 class StoreListSerializer(serializers.ModelSerializer):
